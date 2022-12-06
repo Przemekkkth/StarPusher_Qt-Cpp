@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <QString>
+#include <QDebug>
 
 template <typename Resource, typename Identifier>
 class ResourceHolder
@@ -34,7 +35,7 @@ void ResourceHolder<Resource, Identifier>::load(Identifier id, const QString& fi
     if (!resource->load(filename))
     {
         //throw std::runtime_error("ResourceHolder::load - Failed to load " + filename);
-
+        qDebug() << "ResourceHolder::load - Failed to load " + filename;
     }
 
     // If loading successful, insert resource to map

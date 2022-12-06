@@ -3,7 +3,11 @@
 
 #include <QGraphicsScene>
 #include <QElapsedTimer>
+#include <QPixmap>
+#include <QString>
+#include <QMap>
 #include <QTimer>
+#include <QList>
 
 struct KeyStatus
 {
@@ -42,6 +46,10 @@ private:
     QElapsedTimer m_elapsedTimer;
     float m_deltaTime = 0.0f, m_loopTime = 0.0f;
     const float m_loopSpeed = int(1000.0f/FPS);
+
+    const QMap<QString, QPixmap> TILEMAPPING;
+    const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;
+    const QList<QPixmap> PLAYERIMAGES;
     // QGraphicsScene interface
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;

@@ -4,9 +4,29 @@
 #include <QGraphicsPixmapItem>
 #include <QDebug>
 #include "utils.h"
+#include "pixmapmanager.h"
 
 GameScene::GameScene(QObject *parent)
-    : QGraphicsScene(parent)
+    : QGraphicsScene(parent),
+      TILEMAPPING{
+            {"x", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Corner)},
+            {"#", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Wall)},
+            {"o", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::InsideFloor)},
+            {" ", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::OutsideFloor)}
+      },
+      OUTSIDEDECOMAPPING{
+            {"1", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Rock)},
+            {"2", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::ShortTree)},
+            {"3", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::TallTree)},
+            {"4", PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::UglyTree)},
+      },
+      PLAYERIMAGES{
+            PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Princess),
+            PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Boy),
+            PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Catgirl),
+            PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Horngirl),
+            PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Pinkgirl)
+          }
 {
     for(int i = 0; i < 256; ++i)
     {
