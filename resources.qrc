@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/sprite/boy.png</file>
+        <file>res/sprite/catgirl.png</file>
+        <file>res/sprite/grass_block.png</file>
+        <file>res/sprite/horngirl.png</file>
+        <file>res/sprite/pinkgirl.png</file>
+        <file>res/sprite/plain_block.png</file>
+        <file>res/sprite/princess.png</file>
+        <file>res/sprite/redselector.png</file>
+        <file>res/sprite/rock.png</file>
+        <file>res/sprite/selector.png</file>
+        <file>res/sprite/star.png</file>
+        <file>res/sprite/star_solved.png</file>
+        <file>res/sprite/star_title.png</file>
+        <file>res/sprite/tree_short.png</file>
+        <file>res/sprite/tree_tall.png</file>
+        <file>res/sprite/tree_ugly.png</file>
+        <file>res/sprite/wall_block_tall.png</file>
+        <file>res/sprite/wood_block_tall.png</file>
+    </qresource>
+</RCC>
