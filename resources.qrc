@@ -18,5 +18,7 @@
         <file>res/sprite/tree_ugly.png</file>
         <file>res/sprite/wall_block_tall.png</file>
         <file>res/sprite/wood_block_tall.png</file>
+        <file>res/lvl/starPusherLevels.txt</file>
+        <file>res/lvl/test.txt</file>
     </qresource>
 </RCC>

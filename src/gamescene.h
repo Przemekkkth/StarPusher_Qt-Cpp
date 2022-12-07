@@ -38,6 +38,7 @@ private slots:
 private:
     void handlePlayerInput();
     void resetStatus();
+    void readLevelsFile(QString pathFile);
     KeyStatus* m_keys[256];
     MouseStatus* m_mouse;
 

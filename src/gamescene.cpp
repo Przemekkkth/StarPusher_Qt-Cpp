@@ -3,6 +3,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsPixmapItem>
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
 #include "utils.h"
 #include "pixmapmanager.h"
 
@@ -37,6 +39,8 @@ GameScene::GameScene(QObject *parent)
     connect(&m_timer, &QTimer::timeout, this, &GameScene::loop);
     m_timer.start(int(1000.0f/FPS));
     m_elapsedTimer.start();
+
+    readLevelsFile(":/res/lvl/test.txt");
 }
 
 void GameScene::loop()
@@ -69,6 +73,88 @@ void GameScene::resetStatus()
         m_keys[i]->m_released = false;
     }
     m_mouse->m_released = false;
+}
+
+void GameScene::readLevelsFile(QString pathFile)
+{
+    int maxWidth = -1;
+    QStringList dataContent;
+    QFile file(pathFile);
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QTextStream stream(&file);
+        while(!stream.atEnd())
+        {
+            QString line = stream.readLine();
+            dataContent.push_back(line);
+            //qDebug() << line << " length " << line.length();
+        }
+//Find the longest row in the map
+        for(int i = 0; i < dataContent.size(); ++i)
+        {
+            if(dataContent[i].length() > maxWidth)
+            {
+                maxWidth = dataContent[i].length();
+            }
+        }
+//Be sure map is rectange
+        for(int i = 0; i < dataContent.size(); ++i)
+        {
+            if(dataContent[i].length() < maxWidth)
+            {
+                for(int j = 0; j <= maxWidth-dataContent[i].length(); ++j)
+                {
+                    dataContent[i] += " ";
+                }
+            }
+        }
+//Resize and fill map object
+        QList<QList<QChar> > mapObj;
+        mapObj.resize(dataContent.size());
+        for(int y = 0; y < dataContent.size(); ++y)
+        {
+            mapObj[y].resize(maxWidth);
+        }
+        for(int y = 0; y < dataContent.size(); ++y)
+        {
+            for(int x = 0; x < maxWidth; ++x)
+            {
+                mapObj[x].push_back(dataContent[y][x]);
+            }
+        }
+//Loop through the spaces in the map and find the @, ., and $
+//characters for the starting game state.
+
+        QPoint startPos;
+        QList<QPoint> goals;
+        QList<QPoint> stars;
+        for(int x = 0; x < maxWidth; ++x)
+        {
+            for(int y = 0; y < mapObj[x].length(); ++y)
+            {
+                if(mapObj[x][y] == QChar('@') || mapObj[x][y] == QChar('+'))
+                {
+                    // '@' is player, '+' is player & goal
+                    startPos.setX(x);
+                    startPos.setY(y);
+                }
+                if(mapObj[x][y] == QChar('.') || mapObj[x][y] == QChar('+') || mapObj[x][y] == QChar('*'))
+                {
+                    // '.' is goal, '*' is star & goal
+                    QPoint p(x,y);
+                    goals.push_back(p);
+                }
+                if(mapObj[x][y] == QChar('$') || mapObj[x][y] == QChar('*'))
+                {
+                    // '$' is star
+                    QPoint p(x,y);
+                    stars.push_back(p);
+                }
+            }
+        }
+        qDebug() << "startPos " << startPos << " goals " << goals << " stars " << stars;
+    }
+    file.close();
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
