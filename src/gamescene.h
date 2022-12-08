@@ -48,15 +48,6 @@ private:
     bool makeMove(QList<QList<QChar>> mapObj, GameState gameStateObj, QString playerMoveTo);
     void decorateMap();
 
-    KeyStatus* m_keys[256];
-    MouseStatus* m_mouse;
-
-    const int FPS = 60;
-    QTimer m_timer;
-    QElapsedTimer m_elapsedTimer;
-    float m_deltaTime = 0.0f, m_loopTime = 0.0f;
-    const float m_loopSpeed = int(1000.0f/FPS);
-
     const QMap<QString, QPixmap> TILEMAPPING;
     const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;
     const QList<QPixmap> PLAYERIMAGES;
@@ -67,7 +58,15 @@ private:
     GameState m_gameStateObj;
     Level m_levelObj;
     bool m_mapNeedsRedraw;
-    // QGraphicsScene interface
+    int m_cameraOffsetX, m_cameraOffsetY;
+
+    KeyStatus* m_keys[256];
+    MouseStatus* m_mouse;
+    const int FPS = 60;
+    QTimer m_timer;
+    QElapsedTimer m_elapsedTimer;
+    float m_deltaTime = 0.0f, m_loopTime = 0.0f;
+    const float m_loopSpeed = int(1000.0f/FPS);
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;

@@ -32,7 +32,9 @@ GameScene::GameScene(QObject *parent)
           },
       m_currentLevelIndex(0),
       m_currentImageIndex(0),
-      m_mapNeedsRedraw(false)
+      m_mapNeedsRedraw(false),
+      m_cameraOffsetX(0),
+      m_cameraOffsetY(0)
 {
     for(int i = 0; i < 256; ++i)
     {
@@ -72,6 +74,11 @@ void GameScene::loop()
 void GameScene::handlePlayerInput()
 {
     QString playerMove = GAME::NONE;
+    int mapWidth = m_mapObj.length() * GAME::TILEWIDTH;
+    int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
+    bool cameraUp = false, cameraDown = false, cameraLeft = false, cameraRight = false;
+    int MAX_CAM_X_PAN = std::abs(SCREEN::HALF_HEIGHT - int(mapHeight / 2)) + GAME::TILEWIDTH;
+    int MAX_CAM_Y_PAN = std::abs(SCREEN::HALF_WIDTH- int(mapWidth / 2)) + GAME::TILEHEIGHT;
     if(m_keys[KEYBOARD::KEY_DOWN]->m_released)
     {
         playerMove = GAME::DOWN;
@@ -88,21 +95,25 @@ void GameScene::handlePlayerInput()
     {
         playerMove = GAME::UP;
     }
-    else if(m_keys[KEYBOARD::KEY_A]->m_released)
+    else if(m_keys[KEYBOARD::KEY_A]->m_held)
     {
         //camera left
+        cameraLeft = true;
     }
-    else if(m_keys[KEYBOARD::KEY_D]->m_released)
+    else if(m_keys[KEYBOARD::KEY_D]->m_held)
     {
         //camera right
+        cameraRight = true;
     }
-    else if(m_keys[KEYBOARD::KEY_S]->m_released)
+    else if(m_keys[KEYBOARD::KEY_S]->m_held)
     {
         //camera down
+        cameraDown = true;
     }
-    else if(m_keys[KEYBOARD::KEY_W]->m_released)
+    else if(m_keys[KEYBOARD::KEY_W]->m_held)
     {
         //camera up
+        cameraUp = true;
     }
     else if(m_keys[KEYBOARD::KEY_C]->m_released)
     {
@@ -132,8 +143,26 @@ void GameScene::handlePlayerInput()
             m_gameStateObj.stepCounter += 1;
             m_mapNeedsRedraw = true;
         }
-
     }
+
+
+    if( cameraUp && m_cameraOffsetY < MAX_CAM_X_PAN)
+    {
+        m_cameraOffsetY += GAME::CAM_MOVE_SPEED;
+    }
+    else if(cameraDown && m_cameraOffsetY > -MAX_CAM_X_PAN)
+    {
+        m_cameraOffsetY -= GAME::CAM_MOVE_SPEED;
+    }
+    if(cameraLeft && m_cameraOffsetX < MAX_CAM_Y_PAN)
+    {
+        m_cameraOffsetX += GAME::CAM_MOVE_SPEED;
+    }
+    else if(cameraRight && m_cameraOffsetX > -MAX_CAM_Y_PAN)
+    {
+        m_cameraOffsetX -= GAME::CAM_MOVE_SPEED;
+    }
+    setSceneRect(-SCREEN::HALF_WIDTH/2 - m_cameraOffsetX, -SCREEN::HALF_HEIGHT/2 - m_cameraOffsetY, SCREEN::PHYSICAL_SIZE.width(), SCREEN::PHYSICAL_SIZE.height());
 }
 
 void GameScene::resetStatus()
