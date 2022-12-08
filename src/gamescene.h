@@ -45,7 +45,7 @@ private:
     void runLevel();
     void drawMap();
     bool isBlocked(int x, int y);
-    bool makeMove(QList<QList<QChar>> mapObj, GameState gameStateObj, QString playerMoveTo);
+    bool makeMove(QString playerMoveTo);
     void decorateMap();
 
     const QMap<QString, QPixmap> TILEMAPPING;

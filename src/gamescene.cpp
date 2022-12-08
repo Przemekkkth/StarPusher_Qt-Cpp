@@ -136,7 +136,7 @@ void GameScene::handlePlayerInput()
 
     if(playerMove != GAME::NONE)
     {
-        bool moved = makeMove(m_mapObj, m_gameStateObj, playerMove);
+        bool moved = makeMove(playerMove);
         if(moved)
         {
             //gameStateObj['stepCounter'] += 1
@@ -418,10 +418,10 @@ bool GameScene::isBlocked(int x, int y)
     return false;
 }
 
-bool GameScene::makeMove(QList<QList<QChar> > mapObj, GameState gameStateObj, QString playerMoveTo)
+bool GameScene::makeMove(QString playerMoveTo)
 {
-    QPoint playerPos = gameStateObj.player;
-    QList<QPoint> stars = gameStateObj.stars;
+    QPoint playerPos = m_gameStateObj.player;
+    QList<QPoint> stars = m_gameStateObj.stars;
     int xOffset = 0, yOffset = 0;
     if(playerMoveTo == GAME::UP)
     {
