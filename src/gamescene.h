@@ -40,14 +40,14 @@ private:
     void handlePlayerInput();
     void resetStatus();
     void readLevelsFile(QString pathFile);
-    bool isWall(QList<QList<QChar> > mapObj, int x, int y);
-    void floodFill(QList<QList<QChar> >& mapObj, int x, int y, QChar oldChar, QChar newChar);
+    bool isWall(int x, int y);
+    void floodFill(int x, int y, QChar oldChar, QChar newChar);
     void runLevel();
-    void drawMap(QList<QList<QChar> >& mapObj, GameState gameState, QList<QPoint> goals);
-    bool isBlocked(QList<QList<QChar>> mapObj, GameState gameState, int x, int y);
+    void drawMap();
+    bool isBlocked(int x, int y);
     bool makeMove(QList<QList<QChar>> mapObj, GameState gameStateObj, QString playerMoveTo);
+    void decorateMap();
 
-    QList<QList<QChar >> decorateMap(QList<QList<QChar> > mapObj, QPoint startPos);
     KeyStatus* m_keys[256];
     MouseStatus* m_mouse;
 

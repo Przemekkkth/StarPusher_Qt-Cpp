@@ -62,7 +62,7 @@ void GameScene::loop()
         if(m_mapNeedsRedraw)
         {
             clear();
-            drawMap(m_mapObj, m_gameStateObj, m_levelObj.goals);
+            drawMap();
             m_mapNeedsRedraw = false;
         }
         resetStatus();
@@ -240,77 +240,81 @@ void GameScene::readLevelsFile(QString pathFile)
     file.close();
 }
 
-bool GameScene::isWall(QList<QList<QChar> > mapObj, int x, int y)
+bool GameScene::isWall(int x, int y)
 {
-    if(x < 0 || x >= mapObj.length() || y < 0 || y >= mapObj[x].length())
+    if(x < 0 || x >= m_mapObj.length() || y < 0 || y >= m_mapObj[x].length())
     {
         return false;
     }
-    else if(mapObj[x][y] == QChar('#') || mapObj[x][y] == QChar('x'))
+    else if(m_mapObj[x][y] == QChar('#') || m_mapObj[x][y] == QChar('x'))
     {
         return true;
     }
     return false;
 }
 
-void GameScene::floodFill(QList<QList<QChar> > &mapObj, int x, int y, QChar oldChar, QChar newChar)
+void GameScene::floodFill(int x, int y, QChar oldChar, QChar newChar)
 {
-    if(mapObj[x][y] == oldChar)
+    if(m_mapObj[x][y] == oldChar)
     {
-        mapObj[x][y] = newChar;
+        m_mapObj[x][y] = newChar;
     }
 
-    if(x < mapObj.length()-1 && mapObj[x+1][y] == oldChar)
+    if(x < m_mapObj.length()-1 && m_mapObj[x+1][y] == oldChar)
     {
-        floodFill(mapObj, x+1, y, oldChar, newChar); // call right
+        floodFill(x+1, y, oldChar, newChar); // call right
     }
-    if(x > 0 && mapObj[x-1][y] == oldChar)
+    if(x > 0 && m_mapObj[x-1][y] == oldChar)
     {
-        floodFill(mapObj, x-1, y, oldChar, newChar); // call left
+        floodFill(x-1, y, oldChar, newChar); // call left
     }
-    if(y < mapObj[x].length() && mapObj[x][y+1] == oldChar)
+    if(y < m_mapObj[x].length() && m_mapObj[x][y+1] == oldChar)
     {
-        floodFill(mapObj, x, y+1, oldChar, newChar); // call down
+        floodFill(x, y+1, oldChar, newChar); // call down
     }
-    if(y > 0 && mapObj[x][y-1] == oldChar)
+    if(y > 0 && m_mapObj[x][y-1] == oldChar)
     {
-        floodFill(mapObj, x, y-1, oldChar, newChar); // call up
+        floodFill(x, y-1, oldChar, newChar); // call up
     }
 }
 
 void GameScene::runLevel()
 {
     m_levelObj = m_levels[m_currentLevelIndex];
-    m_mapObj = decorateMap(m_levelObj.mapObj, m_levelObj.startState.player);
+    m_mapObj = m_levelObj.mapObj;
     m_gameStateObj = m_levelObj.startState;
+
+    decorateMap();
+
     int mapWidth = m_mapObj.length() * GAME::TILEWIDTH;
     int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
     int MAX_CAM_X_PAN = std::abs(SCREEN::HALF_HEIGHT - int(mapHeight / 2)) + GAME::TILEWIDTH;
     int MAX_CAM_Y_PAN = std::abs(SCREEN::HALF_WIDTH - int(mapWidth / 2)) + GAME::TILEHEIGHT;
-    drawMap(m_mapObj, m_gameStateObj, m_levelObj.goals);
+    drawMap();
 
 }
 
-void GameScene::drawMap(QList<QList<QChar> > &mapObj, GameState gameState, QList<QPoint> goals)
+void GameScene::drawMap()
 {
-    int mapSurfWidth = mapObj.length() * GAME::TILEWIDTH;
-    int mapSurfHeight = (mapObj[0].length()-1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
+    int mapSurfWidth = m_mapObj.length() * GAME::TILEWIDTH;
+    int mapSurfHeight = (m_mapObj[0].length()-1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
     setBackgroundBrush(GAME::BGCOLOR);
-    for(int x = 0; x < mapObj.length(); ++x)
+    QList<QPoint> goals = m_levelObj.goals;
+    for(int x = 0; x < m_mapObj.length(); ++x)
     {
-        for(int y = 0; y < mapObj[x].length(); ++y)
+        for(int y = 0; y < m_mapObj[x].length(); ++y)
         {
             QRect spaceRect = QRect(x*GAME::TILEWIDTH, y*GAME::TILEFLOORHEIGHT,
                                     GAME::TILEWIDTH, GAME::TILEHEIGHT);
             QPixmap pixmap;
             bool isDraw = false;
-            if(TILEMAPPING.contains(QString(mapObj[x][y])))
+            if(TILEMAPPING.contains(QString(m_mapObj[x][y])))
             {
-                //baseTile = TILEMAPPING[mapObj[x][y]]
-                pixmap = TILEMAPPING[QString(mapObj[x][y])];
+                //baseTile = TILEMAPPING[m_mapObj[x][y]]
+                pixmap = TILEMAPPING[QString(m_mapObj[x][y])];
                 isDraw = true;
             }
-            else if(OUTSIDEDECOMAPPING.contains(QString(mapObj[x][y])))
+            else if(OUTSIDEDECOMAPPING.contains(QString(m_mapObj[x][y])))
             {
                 pixmap = TILEMAPPING[" "];
                 isDraw = true;
@@ -323,15 +327,15 @@ void GameScene::drawMap(QList<QList<QChar> > &mapObj, GameState gameState, QList
                 addItem(pItem);
             }
 
-            if(OUTSIDEDECOMAPPING.contains(QString(mapObj[x][y])))
+            if(OUTSIDEDECOMAPPING.contains(QString(m_mapObj[x][y])))
             {
-                pixmap = OUTSIDEDECOMAPPING[QString(mapObj[x][y])];
+                pixmap = OUTSIDEDECOMAPPING[QString(m_mapObj[x][y])];
                 QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
                 pItem->setPos(spaceRect.x(), spaceRect.y());
                 pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
                 addItem(pItem);
             }
-            else if(gameState.stars.contains(QPoint(x,y)))
+            else if(m_gameStateObj.stars.contains(QPoint(x,y)))
             {
                 if(goals.contains(QPoint(x,y)))
                 {
@@ -356,7 +360,7 @@ void GameScene::drawMap(QList<QList<QChar> > &mapObj, GameState gameState, QList
                 addItem(pItem);
             }
 
-            if(gameState.player == QPoint(x,y))
+            if(m_gameStateObj.player == QPoint(x,y))
             {
                 pixmap = PLAYERIMAGES.at(m_currentImageIndex);
                 QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
@@ -368,17 +372,17 @@ void GameScene::drawMap(QList<QList<QChar> > &mapObj, GameState gameState, QList
     }
 }
 
-bool GameScene::isBlocked(QList<QList<QChar> > mapObj, GameState gameState, int x, int y)
+bool GameScene::isBlocked(int x, int y)
 {
-    if(isWall(mapObj, x, y))
+    if(isWall(x, y))
     {
         return true;
     }
-    else if(x < 0 || x >= mapObj.length() || y < 0 || y >= mapObj[x].length())
+    else if(x < 0 || x >= m_mapObj.length() || y < 0 || y >= m_mapObj[x].length())
     {
         return true;
     }
-    else if(gameState.stars.contains(QPoint(x,y)))
+    else if(m_gameStateObj.stars.contains(QPoint(x,y)))
     {
         return true;
     }
@@ -411,7 +415,7 @@ bool GameScene::makeMove(QList<QList<QChar> > mapObj, GameState gameStateObj, QS
         yOffset = 1;
     }
 
-    if( isWall(mapObj, playerPos.x()+xOffset, playerPos.y()+yOffset))
+    if( isWall(playerPos.x()+xOffset, playerPos.y()+yOffset))
     {
         return false;
     }
@@ -419,7 +423,7 @@ bool GameScene::makeMove(QList<QList<QChar> > mapObj, GameState gameStateObj, QS
     {
         if(stars.contains(QPoint(playerPos.x() + xOffset, playerPos.y() + yOffset)))
         {
-            if(!isBlocked(mapObj, gameStateObj, playerPos.x() + (xOffset*2), playerPos.y() + (yOffset*2)))
+            if(!isBlocked(playerPos.x() + (xOffset*2), playerPos.y() + (yOffset*2)))
             {
                 int index = -1;
                 for(int i = 0; i < stars.size(); ++i)
@@ -445,54 +449,52 @@ bool GameScene::makeMove(QList<QList<QChar> > mapObj, GameState gameStateObj, QS
     }
 }
 
-QList<QList<QChar> > GameScene::decorateMap(QList<QList<QChar> > mapObj, QPoint startPos)
+void GameScene::decorateMap()
 {
     // Remove the non-wall characters from the map data
-    QList<QList<QChar> > mapCopyObj = mapObj;
-    for(int x = 0; x < mapCopyObj.length(); ++x)
+    QPoint startPos = m_gameStateObj.player;
+    for(int x = 0; x < m_mapObj.length(); ++x)
     {
-        for(int y = 0; y < mapCopyObj[0].length(); ++y)
+        for(int y = 0; y < m_mapObj[0].length(); ++y)
         {
-            if(     mapCopyObj[x][y] == QChar('$') ||
-                    mapCopyObj[x][y] == QChar('.') ||
-                    mapCopyObj[x][y] == QChar('@') ||
-                    mapCopyObj[x][y] == QChar('+') ||
-                    mapCopyObj[x][y] == QChar('*') )
+            if(     m_mapObj[x][y] == QChar('$') ||
+                    m_mapObj[x][y] == QChar('.') ||
+                    m_mapObj[x][y] == QChar('@') ||
+                    m_mapObj[x][y] == QChar('+') ||
+                    m_mapObj[x][y] == QChar('*') )
             {
-                mapCopyObj[x][y] = QChar(' ');
+                m_mapObj[x][y] = QChar(' ');
             }
         }
     }
     // Flood fill to determine inside/outside floor tiles.
-    floodFill(mapCopyObj, startPos.x(), startPos.y(), ' ', 'o');
+    floodFill(startPos.x(), startPos.y(), ' ', 'o');
     //Convert the adjoined walls into corner tiles.
-    for(int x = 0; x < mapCopyObj.length(); ++x)
+    for(int x = 0; x < m_mapObj.length(); ++x)
     {
-        for(int y = 0; y < mapCopyObj[0].length(); ++y)
+        for(int y = 0; y < m_mapObj[0].length(); ++y)
         {
-            if(mapCopyObj[x][y] == QChar('#') )
+            if(m_mapObj[x][y] == QChar('#') )
             {
-                if( (isWall(mapCopyObj, x, y-1) && isWall(mapCopyObj, x+1, y) ) ||
-                        (isWall(mapCopyObj, x+1, y) && isWall(mapCopyObj, x, y+1) ) ||
-                        (isWall(mapCopyObj, x, y+1) && isWall(mapCopyObj, x-1, y) ) ||
-                        (isWall(mapCopyObj, x-1, y) && isWall(mapCopyObj, x, y-1) )  )
+                if( (isWall(x, y-1) && isWall(x+1, y) ) ||
+                    (isWall(x+1, y) && isWall(x, y+1) ) ||
+                    (isWall(x, y+1) && isWall(x-1, y) ) ||
+                    (isWall(x-1, y) && isWall(x, y-1) )  )
                 {
-                    mapCopyObj[x][y] = 'x';
+                    m_mapObj[x][y] = 'x';
                 }
             }
-            else if(mapCopyObj[x][y] == QChar(' ') &&
+            else if(m_mapObj[x][y] == QChar(' ') &&
                     rand()%100 < GAME::OUTSIDE_DECORATION_PCT)
             {
-                //mapObjCopy[x][y] = random.choice(list(OUTSIDEDECOMAPPING.keys()))
                 int size = OUTSIDEDECOMAPPING.size();
                 int randomIdx = rand() % size;
                 QChar c = OUTSIDEDECOMAPPING.keys().at(randomIdx).toLatin1()[0];
-                mapCopyObj[x][y] = c;
+                m_mapObj[x][y] = c;
             }
 
         }
     }
-    return mapCopyObj;
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
