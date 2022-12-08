@@ -4,6 +4,7 @@
 #include <QtGlobal>
 #include <QSize>
 #include <QColor>
+#include <QString>
 
 namespace KEYBOARD
 {
@@ -128,6 +129,12 @@ namespace GAME
     static constexpr const QColor WHITE               = QColor(255, 255, 255);
     static constexpr const QColor BGCOLOR             = BRIGHTBLUE;
     static constexpr const QColor TEXTCOLOR           = WHITE;
+    static const QString NONE           = "NONE";
+    static const QString LEFT           = "LEFT";
+    static const QString RIGHT          = "RIGHT";
+    static const QString UP             = "UP";
+    static const QString DOWN           = "DOWN";
+
 }
 
 #endif // UTILS_H

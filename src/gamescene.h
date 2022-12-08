@@ -44,6 +44,8 @@ private:
     void floodFill(QList<QList<QChar> >& mapObj, int x, int y, QChar oldChar, QChar newChar);
     void runLevel();
     void drawMap(QList<QList<QChar> >& mapObj, GameState gameState, QList<QPoint> goals);
+    bool isBlocked(QList<QList<QChar>> mapObj, GameState gameState, int x, int y);
+    bool makeMove(QList<QList<QChar>> mapObj, GameState gameStateObj, QString playerMoveTo);
 
     QList<QList<QChar >> decorateMap(QList<QList<QChar> > mapObj, QPoint startPos);
     KeyStatus* m_keys[256];
@@ -61,6 +63,10 @@ private:
     QList<Level> m_levels;
     int m_currentLevelIndex;
     int m_currentImageIndex;
+    QList<QList<QChar> > m_mapObj;
+    GameState m_gameStateObj;
+    Level m_levelObj;
+    bool m_mapNeedsRedraw;
     // QGraphicsScene interface
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;

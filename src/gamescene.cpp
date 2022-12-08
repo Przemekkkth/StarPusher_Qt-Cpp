@@ -31,7 +31,8 @@ GameScene::GameScene(QObject *parent)
           PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Pinkgirl)
           },
       m_currentLevelIndex(0),
-      m_currentImageIndex(0)
+      m_currentImageIndex(0),
+      m_mapNeedsRedraw(false)
 {
     for(int i = 0; i < 256; ++i)
     {
@@ -58,15 +59,77 @@ void GameScene::loop()
         m_loopTime -= m_loopSpeed;
 
         handlePlayerInput();
+        if(m_mapNeedsRedraw)
+        {
+            clear();
+            //drawMap(m_mapObj)
+            drawMap(m_mapObj, m_gameStateObj, m_levelObj.goals);
+            m_mapNeedsRedraw = false;
+        }
         resetStatus();
     }
 }
 
 void GameScene::handlePlayerInput()
 {
-    if(m_mouse->m_released)
+    QString playerMove = GAME::NONE;
+    if(m_keys[KEYBOARD::KEY_DOWN]->m_released)
     {
-        qDebug() << "m_mouse->m_released " << m_mouse->m_released;
+        playerMove = GAME::DOWN;
+    }
+    else if(m_keys[KEYBOARD::KEY_RIGHT]->m_released)
+    {
+        playerMove = GAME::RIGHT;
+    }
+    else if(m_keys[KEYBOARD::KEY_LEFT]->m_released)
+    {
+        playerMove = GAME::LEFT;
+    }
+    else if(m_keys[KEYBOARD::KEY_UP]->m_released)
+    {
+        playerMove = GAME::UP;
+    }
+    else if(m_keys[KEYBOARD::KEY_A]->m_released)
+    {
+        //camera left
+    }
+    else if(m_keys[KEYBOARD::KEY_D]->m_released)
+    {
+        //camera right
+    }
+    else if(m_keys[KEYBOARD::KEY_S]->m_released)
+    {
+        //camera down
+    }
+    else if(m_keys[KEYBOARD::KEY_W]->m_released)
+    {
+        //camera up
+    }
+    else if(m_keys[KEYBOARD::KEY_C]->m_released)
+    {
+        //backspace 'reset'
+    }
+    else if(m_keys[KEYBOARD::KEY_P]->m_released)
+    {
+        //backspace 'reset'
+        m_currentImageIndex += 1;
+        if(m_currentImageIndex >= PLAYERIMAGES.length())
+        {
+            m_currentImageIndex = 0;
+        }
+        m_mapNeedsRedraw = true;
+    }
+
+    if(playerMove != GAME::NONE)
+    {
+        bool moved = makeMove(m_mapObj, m_gameStateObj, playerMove);
+        if(moved)
+        {
+            //gameStateObj['stepCounter'] += 1
+            m_gameStateObj.stepCounter += 1;
+            m_mapNeedsRedraw = true;
+        }
+
     }
 }
 
@@ -214,12 +277,15 @@ void GameScene::floodFill(QList<QList<QChar> > &mapObj, int x, int y, QChar oldC
 
 void GameScene::runLevel()
 {
-    Level levelObj = m_levels[m_currentLevelIndex];
-    QList mapObj = decorateMap(levelObj.mapObj, levelObj.startState.player);
-    GameState gameStateObj = levelObj.startState;
-    int mapWidth = mapObj.length() * GAME::TILEWIDTH;
-    int mapHeight = (mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
-    drawMap(mapObj, levelObj.startState, levelObj.goals);
+    m_levelObj = m_levels[m_currentLevelIndex];
+    m_mapObj = decorateMap(m_levelObj.mapObj, m_levelObj.startState.player);
+    m_gameStateObj = m_levelObj.startState;
+    int mapWidth = m_mapObj.length() * GAME::TILEWIDTH;
+    int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
+    int MAX_CAM_X_PAN = std::abs(SCREEN::HALF_HEIGHT - int(mapHeight / 2)) + GAME::TILEWIDTH;
+    int MAX_CAM_Y_PAN = std::abs(SCREEN::HALF_WIDTH - int(mapWidth / 2)) + GAME::TILEHEIGHT;
+    drawMap(m_mapObj, m_gameStateObj, m_levelObj.goals);
+
 }
 
 void GameScene::drawMap(QList<QList<QChar> > &mapObj, GameState gameState, QList<QPoint> goals)
@@ -299,6 +365,83 @@ void GameScene::drawMap(QList<QList<QChar> > &mapObj, GameState gameState, QList
     }
 }
 
+bool GameScene::isBlocked(QList<QList<QChar> > mapObj, GameState gameState, int x, int y)
+{
+    if(isWall(mapObj, x, y))
+    {
+        return true;
+    }
+    else if(x < 0 || x >= mapObj.length() || y < 0 || y >= mapObj[x].length())
+    {
+        return true;
+    }
+    else if(gameState.stars.contains(QPoint(x,y)))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool GameScene::makeMove(QList<QList<QChar> > mapObj, GameState gameStateObj, QString playerMoveTo)
+{
+    QPoint playerPos = gameStateObj.player;
+    QList<QPoint> stars = gameStateObj.stars;
+    int xOffset = 0, yOffset = 0;
+    if(playerMoveTo == GAME::UP)
+    {
+        xOffset = 0;
+        yOffset = -1;
+    }
+    else if(playerMoveTo == GAME::RIGHT)
+    {
+        xOffset = 1;
+        yOffset = 0;
+    }
+    else if(playerMoveTo == GAME::LEFT)
+    {
+        xOffset = -1;
+        yOffset = 0;
+    }
+    else if(playerMoveTo == GAME::DOWN)
+    {
+        xOffset = 0;
+        yOffset = 1;
+    }
+
+    if( isWall(mapObj, playerPos.x()+xOffset, playerPos.y()+yOffset))
+    {
+        return false;
+    }
+    else
+    {
+        if(stars.contains(QPoint(playerPos.x() + xOffset, playerPos.y() + yOffset)))
+        {
+            if(!isBlocked(mapObj, gameStateObj, playerPos.x() + (xOffset*2), playerPos.y() + (yOffset*2)))
+            {
+                int index = -1;
+                for(int i = 0; i < stars.size(); ++i)
+                {
+                    if(stars.at(i) == QPoint(playerPos.x() + xOffset, playerPos.y() + yOffset))
+                    {
+                        index = i;
+                    }
+                }
+                if(index != -1)
+                {
+                   stars[index] = QPoint(stars[index].x()+xOffset, stars[index].y()+yOffset);
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        m_gameStateObj.stars = stars;
+        m_gameStateObj.player = QPoint(playerPos.x()+xOffset, playerPos.y()+yOffset);
+        return true;
+    }
+}
+
 QList<QList<QChar> > GameScene::decorateMap(QList<QList<QChar> > mapObj, QPoint startPos)
 {
     // Remove the non-wall characters from the map data
@@ -360,11 +503,15 @@ void GameScene::keyPressEvent(QKeyEvent *event)
 
 void GameScene::keyReleaseEvent(QKeyEvent *event)
 {
-    if(KEYBOARD::KeysMapper.contains(event->key()))
+    if(!event->isAutoRepeat())
     {
-        m_keys[KEYBOARD::KeysMapper[event->key()]]->m_held = false;
-        m_keys[KEYBOARD::KeysMapper[event->key()]]->m_released = true;
+        if(KEYBOARD::KeysMapper.contains(event->key()))
+        {
+            m_keys[KEYBOARD::KeysMapper[event->key()]]->m_held = false;
+            m_keys[KEYBOARD::KeysMapper[event->key()]]->m_released = true;
+        }
     }
+
     QGraphicsScene::keyReleaseEvent(event);
 }
 
