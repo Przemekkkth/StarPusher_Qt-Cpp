@@ -62,7 +62,6 @@ void GameScene::loop()
         if(m_mapNeedsRedraw)
         {
             clear();
-            //drawMap(m_mapObj)
             drawMap(m_mapObj, m_gameStateObj, m_levelObj.goals);
             m_mapNeedsRedraw = false;
         }
@@ -108,6 +107,10 @@ void GameScene::handlePlayerInput()
     else if(m_keys[KEYBOARD::KEY_C]->m_released)
     {
         //backspace 'reset'
+    }
+    else if(m_keys[KEYBOARD::KEY_R]->m_released)
+    {
+        runLevel();
     }
     else if(m_keys[KEYBOARD::KEY_P]->m_released)
     {
