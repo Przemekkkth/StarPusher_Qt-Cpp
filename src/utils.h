@@ -121,7 +121,7 @@ namespace GAME
     static constexpr const int FPS                    = 30;
     static constexpr const int TILEWIDTH              = 50;
     static constexpr const int TILEHEIGHT             = 85;
-    static constexpr const int TILEFLOORHEIGHT        = 45;
+    static constexpr const int TILEFLOORHEIGHT        = 40;
     static constexpr const int CAM_MOVE_SPEED         = 5;
     static constexpr const int OUTSIDE_DECORATION_PCT = 20;
     static constexpr const QColor BRIGHTBLUE          = QColor(0, 170, 255);

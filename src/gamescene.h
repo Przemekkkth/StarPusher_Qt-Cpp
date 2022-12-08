@@ -8,6 +8,7 @@
 #include <QMap>
 #include <QTimer>
 #include <QList>
+#include "level.h"
 
 struct KeyStatus
 {
@@ -39,6 +40,12 @@ private:
     void handlePlayerInput();
     void resetStatus();
     void readLevelsFile(QString pathFile);
+    bool isWall(QList<QList<QChar> > mapObj, int x, int y);
+    void floodFill(QList<QList<QChar> >& mapObj, int x, int y, QChar oldChar, QChar newChar);
+    void runLevel();
+    void drawMap(QList<QList<QChar> >& mapObj, GameState gameState, QList<QPoint> goals);
+
+    QList<QList<QChar >> decorateMap(QList<QList<QChar> > mapObj, QPoint startPos);
     KeyStatus* m_keys[256];
     MouseStatus* m_mouse;
 
@@ -51,6 +58,9 @@ private:
     const QMap<QString, QPixmap> TILEMAPPING;
     const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;
     const QList<QPixmap> PLAYERIMAGES;
+    QList<Level> m_levels;
+    int m_currentLevelIndex;
+    int m_currentImageIndex;
     // QGraphicsScene interface
 protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
