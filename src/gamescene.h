@@ -47,6 +47,8 @@ private:
     bool isBlocked(int x, int y);
     bool makeMove(QString playerMoveTo);
     void decorateMap();
+    bool isLevelFinished();
+    void drawTilemap(QRect drawRect, const QPixmap pixmap);
 
     const QMap<QString, QPixmap> TILEMAPPING;
     const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;

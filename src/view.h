@@ -14,10 +14,16 @@ signals:
 
 private:
     GameScene* m_gameScene;
-
+    bool m_left, m_right, m_up, m_down;
     // QWidget interface
 protected:
     virtual void keyReleaseEvent(QKeyEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+
+    // QAbstractScrollArea interface
+protected:
+    virtual void scrollContentsBy(int dx, int dy) override;
+
 };
 
 #endif // VIEW_H

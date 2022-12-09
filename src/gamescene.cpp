@@ -145,22 +145,25 @@ void GameScene::handlePlayerInput()
         }
     }
 
-
     if( cameraUp && m_cameraOffsetY < MAX_CAM_X_PAN)
     {
         m_cameraOffsetY += GAME::CAM_MOVE_SPEED;
+        m_mapNeedsRedraw = true;
     }
     else if(cameraDown && m_cameraOffsetY > -MAX_CAM_X_PAN)
     {
         m_cameraOffsetY -= GAME::CAM_MOVE_SPEED;
+        m_mapNeedsRedraw = true;
     }
     if(cameraLeft && m_cameraOffsetX < MAX_CAM_Y_PAN)
     {
         m_cameraOffsetX += GAME::CAM_MOVE_SPEED;
+        m_mapNeedsRedraw = true;
     }
     else if(cameraRight && m_cameraOffsetX > -MAX_CAM_Y_PAN)
     {
         m_cameraOffsetX -= GAME::CAM_MOVE_SPEED;
+        m_mapNeedsRedraw = true;
     }
     setSceneRect(-SCREEN::HALF_WIDTH/2 - m_cameraOffsetX, -SCREEN::HALF_HEIGHT/2 - m_cameraOffsetY, SCREEN::PHYSICAL_SIZE.width(), SCREEN::PHYSICAL_SIZE.height());
 }
@@ -350,52 +353,34 @@ void GameScene::drawMap()
             }
             if(isDraw)
             {
-                QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
-                pItem->setPos(spaceRect.x(), spaceRect.y());
-                pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
-                addItem(pItem);
+                drawTilemap(spaceRect, pixmap);
             }
 
             if(OUTSIDEDECOMAPPING.contains(QString(m_mapObj[x][y])))
             {
                 pixmap = OUTSIDEDECOMAPPING[QString(m_mapObj[x][y])];
-                QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
-                pItem->setPos(spaceRect.x(), spaceRect.y());
-                pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
-                addItem(pItem);
+                drawTilemap(spaceRect, pixmap);
             }
             else if(m_gameStateObj.stars.contains(QPoint(x,y)))
             {
                 if(goals.contains(QPoint(x,y)))
                 {
                     pixmap = PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::CoveredGoal);
-                    QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
-                    pItem->setPos(spaceRect.x(), spaceRect.y());
-                    pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
-                    addItem(pItem);
+                    drawTilemap(spaceRect, pixmap);
                 }
                 pixmap = PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Star);
-                QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
-                pItem->setPos(spaceRect.x(), spaceRect.y());
-                pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
-                addItem(pItem);
+                drawTilemap(spaceRect, pixmap);
             }
             else if(goals.contains(QPoint(x,y)))
             {
                 pixmap = PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::CoveredGoal);
-                QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
-                pItem->setPos(spaceRect.x(), spaceRect.y());
-                pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
-                addItem(pItem);
+                drawTilemap(spaceRect, pixmap);
             }
 
             if(m_gameStateObj.player == QPoint(x,y))
             {
                 pixmap = PLAYERIMAGES.at(m_currentImageIndex);
-                QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
-                pItem->setPos(spaceRect.x(), spaceRect.y());
-                pItem->setPixmap(pixmap.scaled(spaceRect.width(), spaceRect.height()));
-                addItem(pItem);
+                drawTilemap(spaceRect, pixmap);
             }
         }
     }
@@ -524,6 +509,19 @@ void GameScene::decorateMap()
 
         }
     }
+}
+
+bool GameScene::isLevelFinished()
+{
+    return false;
+}
+
+void GameScene::drawTilemap(QRect drawRect, const QPixmap pixmap)
+{
+    QGraphicsPixmapItem* pItem = new QGraphicsPixmapItem();
+    pItem->setPos(drawRect.x(), drawRect.y());
+    pItem->setPixmap(pixmap.scaled(drawRect.width(), drawRect.height()));
+    addItem(pItem);
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
