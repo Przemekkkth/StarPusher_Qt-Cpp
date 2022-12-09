@@ -14,6 +14,7 @@ struct KeyStatus
 {
     bool m_held = false;
     bool m_released = false;
+    static bool s_keyPressed;
 };
 
 struct MouseStatus

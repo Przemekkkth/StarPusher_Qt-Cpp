@@ -9,6 +9,8 @@
 #include "pixmapmanager.h"
 #include "game_state.h"
 
+bool KeyStatus::s_keyPressed = false;
+
 GameScene::GameScene(QObject *parent)
     : QGraphicsScene(parent),
       TILEMAPPING{
@@ -537,6 +539,7 @@ void GameScene::keyPressEvent(QKeyEvent *event)
 {
     if(KEYBOARD::KeysMapper.contains(event->key()))
     {
+        KeyStatus::s_keyPressed = true;
         m_keys[KEYBOARD::KeysMapper[event->key()]]->m_held = true;
     }
     QGraphicsScene::keyPressEvent(event);
@@ -548,6 +551,7 @@ void GameScene::keyReleaseEvent(QKeyEvent *event)
     {
         if(KEYBOARD::KeysMapper.contains(event->key()))
         {
+            KeyStatus::s_keyPressed = false;
             m_keys[KEYBOARD::KeysMapper[event->key()]]->m_held = false;
             m_keys[KEYBOARD::KeysMapper[event->key()]]->m_released = true;
         }
