@@ -50,6 +50,7 @@ private:
     void decorateMap();
     bool isLevelFinished();
     void drawTilemap(QRect drawRect, const QPixmap pixmap);
+    void nextLevel();
 
     const QMap<QString, QPixmap> TILEMAPPING;
     const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;

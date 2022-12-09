@@ -11,7 +11,6 @@ PixmapManager *PixmapManager::Instance()
     return ptr;
 }
 
-
 QPixmap& PixmapManager::getPixmap(TextureID id)
 {
     return m_textures.get(id);

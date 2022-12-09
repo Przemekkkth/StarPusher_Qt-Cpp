@@ -85,8 +85,9 @@ void GameScene::handlePlayerInput()
     int mapWidth = m_mapObj.length() * GAME::TILEWIDTH;
     int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
     bool cameraUp = false, cameraDown = false, cameraLeft = false, cameraRight = false;
-    int MAX_CAM_X_PAN = std::abs(SCREEN::HALF_HEIGHT - int(mapHeight / 2)) + GAME::TILEWIDTH;
-    int MAX_CAM_Y_PAN = std::abs(SCREEN::HALF_WIDTH- int(mapWidth / 2)) + GAME::TILEHEIGHT;
+    int MAX_CAM_X_PAN = std::abs(SCREEN::HALF_HEIGHT - int(mapHeight)) + GAME::TILEWIDTH;
+    int MAX_CAM_Y_PAN = std::abs(SCREEN::HALF_WIDTH- int(mapWidth)) + GAME::TILEHEIGHT;
+
     if(m_keys[KEYBOARD::KEY_DOWN]->m_released)
     {
         playerMove = GAME::DOWN;
@@ -123,9 +124,10 @@ void GameScene::handlePlayerInput()
         //camera up
         cameraUp = true;
     }
-    else if(m_keys[KEYBOARD::KEY_C]->m_released)
+    else if(m_keys[KEYBOARD::KEY_N]->m_released)
     {
-        //backspace 'reset'
+        //next
+        nextLevel();
     }
     else if(m_keys[KEYBOARD::KEY_R]->m_released)
     {
@@ -200,82 +202,106 @@ void GameScene::readLevelsFile(QString pathFile)
         while(!stream.atEnd())
         {
             QString line = stream.readLine();
-            dataContent.push_back(line);
-            //qDebug() << line << " length " << line.length();
-        }
-        //Find the longest row in the map
-        for(int i = 0; i < dataContent.size(); ++i)
-        {
-            if(dataContent[i].length() > maxWidth)
+            if(line.startsWith(";"))
             {
-                maxWidth = dataContent[i].length();
+                continue;
             }
-        }
-        //Be sure map is rectange
-        for(int i = 0; i < dataContent.size(); ++i)
-        {
-            if(dataContent[i].length() < maxWidth)
+            if(!line.isEmpty())
             {
-                for(int j = 0; j <= maxWidth-dataContent[i].length(); ++j)
+                dataContent.push_back(line);
+                //qDebug() << "dataContent " << dataContent;
+            }
+            else if (line.isEmpty() && dataContent.length() > 0)
+            {
+                if(!dataContent.size())
                 {
-                    dataContent[i] += " ";
+                    continue;
                 }
-            }
-        }
-        //Resize and fill map object
-        QList<QList<QChar> > mapObj;
-        mapObj.resize(dataContent.size());
-        for(int y = 0; y < dataContent.size(); ++y)
-        {
-            for(int x = 0; x < maxWidth; ++x)
-            {
-                mapObj[x].push_back(dataContent[y][x]);
-            }
-        }
-        //Loop through the spaces in the map and find the @, ., and $
-        //characters for the starting game state.
+                //Find the longest row in the map
+                for(int i = 0; i < dataContent.size(); ++i)
+                {
+                    if(dataContent[i].length() > maxWidth)
+                    {
+                        maxWidth = dataContent[i].length();
+                    }
+                }
+                //Be sure map is rectange
+                for(int i = 0; i < dataContent.size(); ++i)
+                {
 
-        QPoint startPos;
-        QList<QPoint> goals;
-        QList<QPoint> stars;
-        for(int x = 0; x < maxWidth; ++x)
-        {
-            for(int y = 0; y < mapObj[x].length(); ++y)
-            {
-                if(mapObj[x][y] == QChar('@') || mapObj[x][y] == QChar('+'))
-                {
-                    // '@' is player, '+' is player & goal
-                    startPos.setX(x);
-                    startPos.setY(y);
+                    if(dataContent[i].length() < maxWidth)
+                    {
+                        for(int j = 0; j <= maxWidth-dataContent[i].length(); ++j)
+                        {
+                            dataContent[i] += " ";
+                        }
+                    }
                 }
-                if(mapObj[x][y] == QChar('.') || mapObj[x][y] == QChar('+') || mapObj[x][y] == QChar('*'))
+
+                //Resize and fill map object
+                QList<QList<QChar> > mapObj;
+                mapObj.resize(dataContent.size());
+                for(int y = 0; y < dataContent.size(); ++y)
                 {
-                    // '.' is goal, '*' is star & goal
-                    QPoint p(x,y);
-                    goals.push_back(p);
+                    for(int x = 0; x < maxWidth; ++x)
+                    {
+                        if(dataContent[y][x] == QChar('-'))
+                        {
+                            dataContent[y][x] = QChar(' ');
+                        }
+                        mapObj[x].push_back(dataContent[y][x]);
+                    }
                 }
-                if(mapObj[x][y] == QChar('$') || mapObj[x][y] == QChar('*'))
+                //Loop through the spaces in the map and find the @, ., and $
+                //characters for the starting game state.
+
+                QPoint startPos;
+                QList<QPoint> goals;
+                QList<QPoint> stars;
+                for(int x = 0; x < maxWidth; ++x)
                 {
-                    // '$' is star
-                    QPoint p(x,y);
-                    stars.push_back(p);
+                    for(int y = 0; y < mapObj[x].length(); ++y)
+                    {
+                        if(mapObj[x][y] == QChar('@') || mapObj[x][y] == QChar('+'))
+                        {
+                            // '@' is player, '+' is player & goal
+                            startPos.setX(x);
+                            startPos.setY(y);
+                        }
+                        if(mapObj[x][y] == QChar('.') || mapObj[x][y] == QChar('+') || mapObj[x][y] == QChar('*'))
+                        {
+                            // '.' is goal, '*' is star & goal
+                            QPoint p(x,y);
+                            goals.push_back(p);
+                        }
+                        if(mapObj[x][y] == QChar('$') || mapObj[x][y] == QChar('*'))
+                        {
+                            // '$' is star
+                            QPoint p(x,y);
+                            stars.push_back(p);
+                        }
+                    }
                 }
+                ////////////
+                GameState gameStateObj;
+                gameStateObj.player = startPos;
+                gameStateObj.stepCounter = 0;
+                gameStateObj.stars = stars;
+
+                Level levelObj;
+                levelObj.width  = maxWidth;
+                levelObj.height = dataContent.length();
+                levelObj.mapObj = mapObj;
+                levelObj.goals  = goals;
+                levelObj.startState = gameStateObj;
+
+                m_levels.push_back(levelObj);
+                ///clear
+                dataContent.clear();
+                maxWidth = -1;
+                mapObj.clear();
             }
         }
-        ////////////
-        GameState gameStateObj;
-        gameStateObj.player = startPos;
-        gameStateObj.stepCounter = 0;
-        gameStateObj.stars = stars;
-
-        Level levelObj;
-        levelObj.width  = maxWidth;
-        levelObj.height = dataContent.length();
-        levelObj.mapObj = mapObj;
-        levelObj.goals  = goals;
-        levelObj.startState = gameStateObj;
-
-        m_levels.push_back(levelObj);
     }
     else{
         qDebug() << "file is not open";
@@ -328,12 +354,12 @@ void GameScene::runLevel()
     m_gameStateObj = m_levelObj.startState;
 
     decorateMap();
-
-    drawMap();
+    m_mapNeedsRedraw = true;
 }
 
 void GameScene::drawMap()
 {
+    clear();
     setBackgroundBrush(GAME::BGCOLOR);
     QList<QPoint> goals = m_levelObj.goals;
     for(int x = 0; x < m_mapObj.length(); ++x)
@@ -533,6 +559,17 @@ void GameScene::drawTilemap(QRect drawRect, const QPixmap pixmap)
     pItem->setPos(drawRect.x(), drawRect.y());
     pItem->setPixmap(pixmap.scaled(drawRect.width(), drawRect.height()));
     addItem(pItem);
+}
+
+void GameScene::nextLevel()
+{
+    m_currentLevelIndex++;
+    if(m_currentLevelIndex >= m_levels.size())
+    {
+        m_currentLevelIndex = 0;
+    }
+    m_cameraOffsetX = m_cameraOffsetY = 0;
+    runLevel();
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
