@@ -70,10 +70,17 @@ void GameScene::loop()
             drawMap();
             if(m_levelIsCompleted)
             {
-                QRect screenRect = QRect(SCREEN::HALF_WIDTH/2,SCREEN::HALF_WIDTH/4,SCREEN::HALF_WIDTH/2, SCREEN::HALF_WIDTH/2);
+                QRect screenRect = QRect(SCREEN::HALF_WIDTH/2-m_cameraOffsetX,SCREEN::HALF_WIDTH/4-m_cameraOffsetY,SCREEN::HALF_WIDTH/2, SCREEN::HALF_WIDTH/2);
                 drawTilemap(screenRect, PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Solved));
             }
             m_mapNeedsRedraw = false;
+        }
+        if(m_levelIsCompleted)
+        {
+            if(KeyStatus::s_keyPressed)
+            {
+                nextLevel();
+            }
         }
         resetStatus();
     }
