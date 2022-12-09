@@ -129,8 +129,14 @@ void GameScene::handlePlayerInput()
         //next
         nextLevel();
     }
+    else if(m_keys[KEYBOARD::KEY_B]->m_released)
+    {
+        //next
+        previousLevel();
+    }
     else if(m_keys[KEYBOARD::KEY_R]->m_released)
     {
+        //reset
         runLevel();
     }
     else if(m_keys[KEYBOARD::KEY_P]->m_released)
@@ -355,6 +361,8 @@ void GameScene::runLevel()
 
     decorateMap();
     m_mapNeedsRedraw = true;
+    m_cameraOffsetX = m_cameraOffsetY = 0;
+    m_levelIsCompleted = false;
 }
 
 void GameScene::drawMap()
@@ -568,7 +576,16 @@ void GameScene::nextLevel()
     {
         m_currentLevelIndex = 0;
     }
-    m_cameraOffsetX = m_cameraOffsetY = 0;
+    runLevel();
+}
+
+void GameScene::previousLevel()
+{
+    m_currentLevelIndex--;
+    if(m_currentLevelIndex < 0)
+    {
+        m_currentLevelIndex = 0;
+    }
     runLevel();
 }
 
