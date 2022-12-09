@@ -222,7 +222,6 @@ void GameScene::readLevelsFile(QString pathFile)
             if(!line.isEmpty())
             {
                 dataContent.push_back(line);
-                //qDebug() << "dataContent " << dataContent;
             }
             else if (line.isEmpty() && dataContent.length() > 0)
             {
@@ -253,7 +252,8 @@ void GameScene::readLevelsFile(QString pathFile)
 
                 //Resize and fill map object
                 QList<QList<QChar> > mapObj;
-                mapObj.resize(dataContent.size());
+                mapObj.resize(maxWidth);
+
                 for(int y = 0; y < dataContent.size(); ++y)
                 {
                     for(int x = 0; x < maxWidth; ++x)
@@ -362,6 +362,9 @@ void GameScene::floodFill(int x, int y, QChar oldChar, QChar newChar)
 
 void GameScene::runLevel()
 {
+    m_mapObj.clear();
+
+
     m_levelObj = m_levels[m_currentLevelIndex];
     m_mapObj = m_levelObj.mapObj;
     m_gameStateObj = m_levelObj.startState;
