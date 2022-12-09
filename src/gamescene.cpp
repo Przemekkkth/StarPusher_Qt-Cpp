@@ -318,18 +318,11 @@ void GameScene::runLevel()
 
     decorateMap();
 
-    int mapWidth = m_mapObj.length() * GAME::TILEWIDTH;
-    int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
-    int MAX_CAM_X_PAN = std::abs(SCREEN::HALF_HEIGHT - int(mapHeight / 2)) + GAME::TILEWIDTH;
-    int MAX_CAM_Y_PAN = std::abs(SCREEN::HALF_WIDTH - int(mapWidth / 2)) + GAME::TILEHEIGHT;
     drawMap();
-
 }
 
 void GameScene::drawMap()
 {
-    int mapSurfWidth = m_mapObj.length() * GAME::TILEWIDTH;
-    int mapSurfHeight = (m_mapObj[0].length()-1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
     setBackgroundBrush(GAME::BGCOLOR);
     QList<QPoint> goals = m_levelObj.goals;
     for(int x = 0; x < m_mapObj.length(); ++x)
@@ -373,7 +366,7 @@ void GameScene::drawMap()
             }
             else if(goals.contains(QPoint(x,y)))
             {
-                pixmap = PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::CoveredGoal);
+                pixmap = PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::UncoveredGoal);
                 drawTilemap(spaceRect, pixmap);
             }
 
