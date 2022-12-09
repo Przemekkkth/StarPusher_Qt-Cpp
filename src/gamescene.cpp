@@ -366,7 +366,7 @@ void GameScene::drawMap()
     {
         for(int y = 0; y < m_mapObj[x].length(); ++y)
         {
-            QRect spaceRect = QRect(x*GAME::TILEWIDTH, y*GAME::TILEFLOORHEIGHT,
+            QRect spaceRect = QRect(x*GAME::TILEWIDTH+m_cameraOffsetX, y*GAME::TILEFLOORHEIGHT+m_cameraOffsetY,
                                     GAME::TILEWIDTH, GAME::TILEHEIGHT);
             QPixmap pixmap;
             bool isDraw = false;
