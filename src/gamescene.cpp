@@ -33,6 +33,7 @@ GameScene::GameScene(QObject *parent)
       m_currentLevelIndex(0),
       m_currentImageIndex(0),
       m_mapNeedsRedraw(false),
+      m_levelIsCompleted(false),
       m_cameraOffsetX(0),
       m_cameraOffsetY(0)
 {
@@ -65,6 +66,11 @@ void GameScene::loop()
         {
             clear();
             drawMap();
+            if(m_levelIsCompleted)
+            {
+                QRect screenRect = QRect(SCREEN::HALF_WIDTH/2,SCREEN::HALF_WIDTH/4,SCREEN::HALF_WIDTH/2, SCREEN::HALF_WIDTH/2);
+                drawTilemap(screenRect, PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Solved));
+            }
             m_mapNeedsRedraw = false;
         }
         resetStatus();
@@ -134,14 +140,17 @@ void GameScene::handlePlayerInput()
         m_mapNeedsRedraw = true;
     }
 
-    if(playerMove != GAME::NONE)
+    if(playerMove != GAME::NONE && !m_levelIsCompleted)
     {
         bool moved = makeMove(playerMove);
         if(moved)
         {
-            //gameStateObj['stepCounter'] += 1
             m_gameStateObj.stepCounter += 1;
             m_mapNeedsRedraw = true;
+        }
+        if(isLevelFinished())
+        {
+            m_levelIsCompleted = true;
         }
     }
 
@@ -506,7 +515,14 @@ void GameScene::decorateMap()
 
 bool GameScene::isLevelFinished()
 {
-    return false;
+    for(int i = 0; i < m_levelObj.goals.size(); ++i)
+    {
+        if(!m_gameStateObj.stars.contains(m_levelObj.goals.at(i)))
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void GameScene::drawTilemap(QRect drawRect, const QPixmap pixmap)

@@ -60,6 +60,7 @@ private:
     GameState m_gameStateObj;
     Level m_levelObj;
     bool m_mapNeedsRedraw;
+    bool m_levelIsCompleted;
     int m_cameraOffsetX, m_cameraOffsetY;
 
     KeyStatus* m_keys[256];
