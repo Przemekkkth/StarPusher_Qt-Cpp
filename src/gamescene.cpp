@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include <QGraphicsSimpleTextItem>
 #include "utils.h"
 #include "pixmapmanager.h"
 #include "game_state.h"
@@ -73,6 +74,8 @@ void GameScene::loop()
                 QRect screenRect = QRect(SCREEN::HALF_WIDTH/2-m_cameraOffsetX,SCREEN::HALF_WIDTH/4-m_cameraOffsetY,SCREEN::HALF_WIDTH/2, SCREEN::HALF_WIDTH/2);
                 drawTilemap(screenRect, PixmapManager::Instance()->getPixmap(PixmapManager::TextureID::Solved));
             }
+            drawCurentLevelStatus();
+            drawStepCounter();
             m_mapNeedsRedraw = false;
         }
         if(m_levelIsCompleted)
@@ -597,6 +600,31 @@ void GameScene::previousLevel()
         m_currentLevelIndex = 0;
     }
     runLevel();
+}
+
+void GameScene::drawStepCounter()
+{
+
+}
+
+void GameScene::drawCurentLevelStatus()
+{
+    QString text = "Level " + QString::number(m_currentLevelIndex) + " of " + QString::number(m_levels.size());
+    int mapWidth = m_mapObj.length() * GAME::TILEWIDTH;
+    int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
+    QPoint point = QPoint(m_cameraOffsetX,mapHeight);
+    QGraphicsSimpleTextItem* tItem = new QGraphicsSimpleTextItem();
+    QFont font = tItem->font();
+    font.setPixelSize(0.05*sceneRect().height());
+    tItem->setFont(font);
+    tItem->setTransformOriginPoint(QPoint(0,0));
+    tItem->setPen(QColor(GAME::TEXTCOLOR));
+    tItem->setBrush(QColor(GAME::TEXTCOLOR));
+    tItem->setText(text);
+    point.setX(point.x()+m_cameraOffsetX);
+    point.setY(point.y()+m_cameraOffsetY);
+    tItem->setPos(point);
+    addItem(tItem);
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)

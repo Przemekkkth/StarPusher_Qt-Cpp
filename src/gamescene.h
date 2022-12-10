@@ -52,6 +52,8 @@ private:
     void drawTilemap(QRect drawRect, const QPixmap pixmap);
     void nextLevel();
     void previousLevel();
+    void drawStepCounter();
+    void drawCurentLevelStatus();
 
     const QMap<QString, QPixmap> TILEMAPPING;
     const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;
