@@ -54,6 +54,7 @@ private:
     void previousLevel();
     void drawStepCounter();
     void drawCurentLevelStatus();
+    void renderGameScene();
 
     const QMap<QString, QPixmap> TILEMAPPING;
     const QMap<QString, QPixmap> OUTSIDEDECOMAPPING;

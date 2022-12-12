@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QGraphicsSimpleTextItem>
+#include <QPainter>
+#include <QDir>
 #include "utils.h"
 #include "pixmapmanager.h"
 #include "game_state.h"
@@ -158,6 +160,11 @@ void GameScene::handlePlayerInput()
             m_currentImageIndex = 0;
         }
         m_mapNeedsRedraw = true;
+    }
+    else if(m_keys[KEYBOARD::KEY_Z]->m_released)
+    {
+        //render scene to image
+        //renderGameScene();
     }
 
     if(playerMove != GAME::NONE && !m_levelIsCompleted)
@@ -639,6 +646,20 @@ void GameScene::drawCurentLevelStatus()
     point.setY(point.y()+m_cameraOffsetY);
     tItem->setPos(point);
     addItem(tItem);
+}
+
+void GameScene::renderGameScene()
+{
+    static int index = 0;
+    QString fileName = QDir::currentPath() + QDir::separator() + "screen" + QString::number(index++) + ".png";
+    //QRect rect = sceneRect().toAlignedRect();
+    QRect rect = QRect(m_cameraOffsetX, m_cameraOffsetY, SCREEN::PHYSICAL_SIZE.width(), SCREEN::PHYSICAL_SIZE.height());
+    QImage image(rect.size(), QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+    QPainter painter(&image);
+    render(&painter);
+    image.save(fileName);
+    qDebug() << "saved " << fileName;
 }
 
 void GameScene::keyPressEvent(QKeyEvent *event)
