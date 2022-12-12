@@ -50,7 +50,7 @@ GameScene::GameScene(QObject *parent)
     m_timer.start(int(1000.0f/FPS));
     m_elapsedTimer.start();
     srand(time(0));
-    readLevelsFile(":/res/lvl/test.txt");
+    readLevelsFile(":/res/lvl/starPusherLevels.txt");
     runLevel();
 }
 
@@ -604,7 +604,21 @@ void GameScene::previousLevel()
 
 void GameScene::drawStepCounter()
 {
-
+    QString text = "Steps: " + QString::number(m_gameStateObj.stepCounter);
+    int mapHeight = (m_mapObj[0].length() - 1) * GAME::TILEFLOORHEIGHT + GAME::TILEHEIGHT;
+    QPoint point = QPoint(m_cameraOffsetX,mapHeight+0.05*sceneRect().height());
+    QGraphicsSimpleTextItem* tItem = new QGraphicsSimpleTextItem();
+    QFont font = tItem->font();
+    font.setPixelSize(0.05*sceneRect().height());
+    tItem->setFont(font);
+    tItem->setTransformOriginPoint(QPoint(0,0));
+    tItem->setPen(QColor(GAME::TEXTCOLOR));
+    tItem->setBrush(QColor(GAME::TEXTCOLOR));
+    tItem->setText(text);
+    point.setX(point.x()+m_cameraOffsetX);
+    point.setY(point.y()+m_cameraOffsetY);
+    tItem->setPos(point);
+    addItem(tItem);
 }
 
 void GameScene::drawCurentLevelStatus()
