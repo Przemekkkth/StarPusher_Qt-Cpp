@@ -18,3 +18,4 @@ qmake && make
 ## Addons
 * [Qt](https://www.qt.io/) - Cross-Platform software for embedded & desktop
 * [Original](https://inventwithpython.com/pygame/chapter9.html) - source code(Pygame) and explanations
+* [yt](https://youtu.be/UUBLR5Zy27E) - gameplay
